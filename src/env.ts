@@ -1,10 +1,5 @@
-import { getTaro } from './utils'
+import Taro from '@tarojs/taro'
 
-const Taro = getTaro()
-
-export const isWebLikeEnv = (
-  [
-    Taro.ENV_TYPE.WEB,
-    Taro.ENV_TYPE.RN,
-  ].indexOf(Taro.getEnv()) >= 0
+export const isWebLikeEnv = [Taro.ENV_TYPE.WEB, Taro.ENV_TYPE.RN].includes(
+  Taro.getEnv() as typeof Taro.ENV_TYPE.WEB | typeof Taro.ENV_TYPE.RN,
 )

@@ -1,5 +1,6 @@
+import Taro from '@tarojs/taro'
 import { AxiosAdapter, AxiosResponse } from 'axios'
-import { getTaro, isObject, isString, merge } from '../utils'
+import { isObject, isString, merge } from '../utils'
 import { PostData } from '../helpers'
 // @ts-ignore
 import createError from 'axios/lib/core/createError'
@@ -10,13 +11,19 @@ import buildUrl from 'axios/lib/helpers/buildURL'
 // @ts-ignore
 import settle from 'axios/lib/core/settle'
 
-const Taro = getTaro()
-
-export const taroAdapter: AxiosAdapter = config => {
+export const taroAdapter: AxiosAdapter = (config) => {
   return new Promise((resolve, reject) => {
-    const requestMethod: string = (isString(config.method) ? config.method : 'GET').toUpperCase()
-    const requestUrl: string = buildUrl(buildFullPath(config.baseURL, config.url), config.params, config.paramsSerializer)
-    const requestHeaders: Record<string, string> = isObject(config.headers) ? config.headers : {}
+    const requestMethod: string = (
+      isString(config.method) ? config.method : 'GET'
+    ).toUpperCase()
+    const requestUrl: string = buildUrl(
+      buildFullPath(config.baseURL, config.url),
+      config.params,
+      config.paramsSerializer,
+    )
+    const requestHeaders: Record<string, string> = isObject(config.headers)
+      ? config.headers
+      : {}
 
     // 请求数据
     let requestData: any = config.data
@@ -43,7 +50,7 @@ export const taroAdapter: AxiosAdapter = config => {
         })
         abortRequestTask = request.abort
         if (typeof config.onUploadProgress === 'function') {
-          request.progress(e => {
+          request.progress((e) => {
             config.onUploadProgress!(
               merge(
                 e,
@@ -56,7 +63,7 @@ export const taroAdapter: AxiosAdapter = config => {
             )
           })
         }
-        requestTask = request.then(res => {
+        requestTask = request.then((res) => {
           let data = res.data
           if (config.responseType === 'json') {
             try {
@@ -85,14 +92,22 @@ export const taroAdapter: AxiosAdapter = config => {
         url: requestUrl,
         header: requestHeaders,
         // 请求数据只在 POST, PUT, PATCH 时设置
-        data: requestMethod === 'POST' || requestMethod === 'PUT' || requestMethod === 'PATCH' ? requestData : '',
+        data:
+          requestMethod === 'POST'
+          || requestMethod === 'PUT'
+          || requestMethod === 'PATCH'
+            ? requestData
+            : '',
         // 响应的内容只能是 arraybuffer 或 text
-        responseType: config.responseType === 'arraybuffer' ? 'arraybuffer' : 'text',
+        responseType:
+          config.responseType === 'arraybuffer' ? 'arraybuffer' : 'text',
         // 响应数据的类型只能是 json 或 其他
-        dataType: config.responseType === 'json' ? 'json' : config.responseType,
+        dataType: (config.responseType === 'json'
+          ? 'json'
+          : config.responseType) as Taro.request.Option['dataType'],
       })
       abortRequestTask = (request as any).abort
-      requestTask = request.then(res => {
+      requestTask = request.then((res) => {
         return {
           data: res.data,
           status: res.statusCode,
@@ -107,44 +122,53 @@ export const taroAdapter: AxiosAdapter = config => {
     // 支持超时处理
     let timer: any = null
     if (config.timeout) {
-      timer = setTimeout(
-        () => {
-          abortRequestTask && abortRequestTask()
-          // ref: https://github.com/axios/axios/blob/master/lib/adapters/xhr.js#L90
-          const timeoutErrorMessage = `timeout of ${config.timeout}ms exceeded`
-          reject(createError(timeoutErrorMessage, config, 'ECONNABORTED', requestTask))
-        },
-        config.timeout,
-      )
+      timer = setTimeout(() => {
+        abortRequestTask && abortRequestTask()
+        // ref: https://github.com/axios/axios/blob/master/lib/adapters/xhr.js#L90
+        const timeoutErrorMessage = `timeout of ${config.timeout}ms exceeded`
+        reject(
+          createError(timeoutErrorMessage, config, 'ECONNABORTED', requestTask),
+        )
+      }, config.timeout)
     }
 
     // 请求任务结果处理
     requestTask
-      .then(response => {
+      .then((response) => {
         timer && clearTimeout(timer)
         settle(resolve, reject, response)
       })
-      .catch(response => {
+      .catch((response) => {
         timer && clearTimeout(timer)
         // 如果存在状态码，说明请求服务器成功，将结果转发给 axios 处理
-        if (response && typeof response === 'object' && (response.status != null || response.statusCode != null)) {
+        if (
+          response
+          && typeof response === 'object'
+          && (response.status != null || response.statusCode != null)
+        ) {
           settle(resolve, reject, {
             data: response.data,
-            status: response.status != null ? response.status : response.statusCode,
+            status:
+              response.status != null ? response.status : response.statusCode,
             statusText: '',
             headers: response.header || response.headers || {},
             config: config,
             request: requestTask,
           })
         } else {
-          const error = createError('Network Error', config, undefined, requestTask)
+          const error = createError(
+            'Network Error',
+            config,
+            undefined,
+            requestTask,
+          )
           reject(error)
         }
       })
 
     // 支持取消请求任务
     if (config.cancelToken) {
-      config.cancelToken.promise.then(cancel => {
+      config.cancelToken.promise.then((cancel) => {
         timer && clearTimeout(timer)
         abortRequestTask && abortRequestTask()
         reject(cancel)

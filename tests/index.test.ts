@@ -1,6 +1,6 @@
 import * as http from 'http'
 import * as qs from 'qs'
-import * as Taro from '@tarojs/taro-h5'
+import Taro from '@tarojs/taro'
 import { isFunction, isPlainObject, wait } from 'vtils'
 
 process.env.TARO_ENV = 'h5'
@@ -8,26 +8,20 @@ process.env.TARO_ENV = 'h5'
 const withAxiosList: Array<() => Promise<typeof import('../src')>> = [
   async function WebOrRN() {
     jest.resetModules()
-    jest.mock(
-      '@tarojs/taro',
-      () => ({
-        ...Taro,
-        default: undefined,
-        getEnv: () => Taro.ENV_TYPE.WEB,
-      }),
-    )
+    jest.mock('@tarojs/taro', () => ({
+      ...Taro,
+      default: undefined,
+      getEnv: () => Taro.ENV_TYPE.WEB,
+    }))
     return import('../src')
   },
   async function MiniProgram() {
     jest.resetModules()
-    jest.mock(
-      '@tarojs/taro',
-      () => ({
-        ...Taro,
-        default: undefined,
-        getEnv: () => Taro.ENV_TYPE.WEAPP,
-      }),
-    )
+    jest.mock('@tarojs/taro', () => ({
+      ...Taro,
+      default: undefined,
+      getEnv: () => Taro.ENV_TYPE.WEAPP,
+    }))
     return import('../src')
   },
 ]
@@ -59,17 +53,14 @@ async function withServer({
 }
 
 describe('多端适配', () => {
-  [Taro.ENV_TYPE.WEB, Taro.ENV_TYPE.RN].forEach(envType => {
+  [Taro.ENV_TYPE.WEB, Taro.ENV_TYPE.RN].forEach((envType) => {
     test(`${envType} 环境下，使用 xhr 适配器`, async () => {
       jest.resetModules()
-      jest.mock(
-        '@tarojs/taro',
-        () => ({
-          ...Taro,
-          default: undefined,
-          getEnv: () => envType,
-        }),
-      )
+      jest.mock('@tarojs/taro', () => ({
+        ...Taro,
+        default: undefined,
+        getEnv: () => envType,
+      }))
       const { axios } = await import('../src')
       const { xhrAdapter } = await import('../src/adapters')
       expect(axios.defaults.adapter).toBe(xhrAdapter)
@@ -79,14 +70,11 @@ describe('多端适配', () => {
 
   test('小程序环境下，使用 taro 适配器', async () => {
     jest.resetModules()
-    jest.mock(
-      '@tarojs/taro',
-      () => ({
-        ...Taro,
-        default: undefined,
-        getEnv: () => Taro.ENV_TYPE.WEAPP,
-      }),
-    )
+    jest.mock('@tarojs/taro', () => ({
+      ...Taro,
+      default: undefined,
+      getEnv: () => Taro.ENV_TYPE.WEAPP,
+    }))
     const { axios } = await import('../src')
     const { taroAdapter } = await import('../src/adapters')
     expect(axios.defaults.adapter).toBe(taroAdapter)
@@ -94,7 +82,7 @@ describe('多端适配', () => {
   })
 })
 
-withAxiosList.forEach(withAxios => {
+withAxiosList.forEach((withAxios) => {
   describe(`${withAxios.name} - 特性支持`, () => {
     test('支持中断请求', async () => {
       const { axios } = await withAxios()
@@ -105,7 +93,7 @@ withAxiosList.forEach(withAxios => {
       })
       try {
         await axios.get(url, {
-          cancelToken: new axios.CancelToken(cancel => {
+          cancelToken: new axios.CancelToken((cancel) => {
             wait(0).then(() => cancel())
           }),
         })
@@ -114,7 +102,6 @@ withAxiosList.forEach(withAxios => {
       }
       closeServer()
     })
-
     test('异常抛出 - 服务端错误', async () => {
       const { axios } = await withAxios()
       const { url, closeServer } = await withServer({
@@ -130,7 +117,6 @@ withAxiosList.forEach(withAxios => {
       }
       closeServer()
     })
-
     test('异常抛出 - 服务端错误', async () => {
       const { axios } = await withAxios()
       try {
@@ -166,7 +152,7 @@ withAxiosList.forEach(withAxios => {
       const { axios } = await withAxios()
       const { url, closeServer } = await withServer({
         statusCode: 200,
-        response: req => ({
+        response: (req) => ({
           method: req.method,
           success: true,
         }),
@@ -178,12 +164,11 @@ withAxiosList.forEach(withAxios => {
       })
       closeServer()
     })
-
     test('GET 发送请求串数据正常', async () => {
       const { axios } = await withAxios()
       const { url, closeServer } = await withServer({
         statusCode: 200,
-        response: req => ({
+        response: (req) => ({
           method: req.method,
           query: qs.parse(req.url!.split('?')[1]),
           success: true,
@@ -212,7 +197,7 @@ withAxiosList.forEach(withAxios => {
       const { axios } = await withAxios()
       const { url, closeServer } = await withServer({
         statusCode: 200,
-        response: req => ({
+        response: (req) => ({
           method: req.method,
           success: true,
         }),
@@ -224,24 +209,24 @@ withAxiosList.forEach(withAxios => {
       })
       closeServer()
     })
-
     test('POST 发送 JSON 数据正常', async () => {
       const { axios } = await withAxios()
       const { url, closeServer } = await withServer({
         statusCode: 200,
-        response: req => new Promise(resolve => {
-          let str = ''
-          req.on('data', (chunk: Buffer) => {
-            str += chunk.toString('utf8')
-          })
-          req.on('end', () => {
-            resolve({
-              method: req.method,
-              success: true,
-              ...JSON.parse(str),
+        response: (req) =>
+          new Promise((resolve) => {
+            let str = ''
+            req.on('data', (chunk: Buffer) => {
+              str += chunk.toString('utf8')
             })
-          })
-        }),
+            req.on('end', () => {
+              resolve({
+                method: req.method,
+                success: true,
+                ...JSON.parse(str),
+              })
+            })
+          }),
       })
       const res = await axios.post(url, {
         name: 'Jay',
@@ -255,24 +240,24 @@ withAxiosList.forEach(withAxios => {
       })
       closeServer()
     })
-
     test('POST 发送表单数据正常', async () => {
       const { axios } = await withAxios()
       const { url, closeServer } = await withServer({
         statusCode: 200,
-        response: req => new Promise(resolve => {
-          let str = ''
-          req.on('data', (chunk: Buffer) => {
-            str += chunk.toString('utf8')
-          })
-          req.on('end', () => {
-            resolve({
-              method: req.method,
-              success: true,
-              ...qs.parse(str),
+        response: (req) =>
+          new Promise((resolve) => {
+            let str = ''
+            req.on('data', (chunk: Buffer) => {
+              str += chunk.toString('utf8')
             })
-          })
-        }),
+            req.on('end', () => {
+              resolve({
+                method: req.method,
+                success: true,
+                ...qs.parse(str),
+              })
+            })
+          }),
       })
       const res = await axios.post(
         url,
@@ -294,24 +279,24 @@ withAxiosList.forEach(withAxios => {
       })
       closeServer()
     })
-
     test('POST 发送 PostData 表单数据正常', async () => {
       const { axios, PostData } = await withAxios()
       const { url, closeServer } = await withServer({
         statusCode: 200,
-        response: req => new Promise(resolve => {
-          let str = ''
-          req.on('data', (chunk: Buffer) => {
-            str += chunk.toString('utf8')
-          })
-          req.on('end', () => {
-            resolve({
-              method: req.method,
-              success: true,
-              ...qs.parse(str),
+        response: (req) =>
+          new Promise((resolve) => {
+            let str = ''
+            req.on('data', (chunk: Buffer) => {
+              str += chunk.toString('utf8')
             })
-          })
-        }),
+            req.on('end', () => {
+              resolve({
+                method: req.method,
+                success: true,
+                ...qs.parse(str),
+              })
+            })
+          }),
       })
       const res = await axios.post(
         url,
@@ -330,24 +315,24 @@ withAxiosList.forEach(withAxios => {
     })
   })
 })
-
 describe('其他', () => {
   test('PostData 文件上传正常', async () => {
     const { axios, PostData, FileData } = await withAxiosList[0]()
     const { url, closeServer } = await withServer({
       statusCode: 200,
-      response: req => new Promise(resolve => {
-        let str = ''
-        req.on('data', (chunk: Buffer) => {
-          str += chunk.toString('utf8')
-        })
-        req.on('end', () => {
-          resolve({
-            method: req.method,
-            success: str.includes('__x__') && str.includes('test.txt'),
+      response: (req) =>
+        new Promise((resolve) => {
+          let str = ''
+          req.on('data', (chunk: Buffer) => {
+            str += chunk.toString('utf8')
           })
-        })
-      }),
+          req.on('end', () => {
+            resolve({
+              method: req.method,
+              success: str.includes('__x__') && str.includes('test.txt'),
+            })
+          })
+        }),
     })
     const file = new File(Array.from('hello'), 'test.txt')
     const res = await axios.post(

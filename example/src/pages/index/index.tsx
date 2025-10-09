@@ -1,8 +1,7 @@
 import './index.css'
 import React, { Component } from 'react'
 import Taro from '@tarojs/taro'
-// @ts-ignore
-import { axios, FileData, PostData } from '../../../../src'
+import { axios, FileData, PostData } from '@hsuna/taro-axios'
 import { Button, Text, View } from '@tarojs/components'
 
 const axiosWithBaseUrl = axios.create({
@@ -10,15 +9,15 @@ const axiosWithBaseUrl = axios.create({
 })
 
 export default class Index extends Component {
-  componentWillMount() { }
+  componentWillMount() {}
 
-  componentDidMount() { }
+  componentDidMount() {}
 
-  componentWillUnmount() { }
+  componentWillUnmount() {}
 
-  componentDidShow() { }
+  componentDidShow() {}
 
-  componentDidHide() { }
+  componentDidHide() {}
 
   render() {
     return (
@@ -29,11 +28,14 @@ export default class Index extends Component {
           className='button'
           onClick={async () => {
             Taro.showLoading({ title: '请求中...' })
-            const res = await axios.get('https://jsonplaceholder.typicode.com/todos', {
-              params: {
-                userId: 2,
+            const res = await axios.get(
+              'https://jsonplaceholder.typicode.com/todos',
+              {
+                params: {
+                  userId: 2,
+                },
               },
-            })
+            )
             console.log(res)
             Taro.hideLoading()
             Taro.showModal({
@@ -68,9 +70,12 @@ export default class Index extends Component {
           className='button'
           onClick={async () => {
             Taro.showLoading({ title: '请求中...' })
-            const res = await axios.post('https://jsonplaceholder.typicode.com/todos', {
-              test: 1,
-            })
+            const res = await axios.post(
+              'https://jsonplaceholder.typicode.com/todos',
+              {
+                test: 1,
+              },
+            )
             console.log(res)
             Taro.hideLoading()
             Taro.showModal({
@@ -113,11 +118,14 @@ export default class Index extends Component {
           onClick={async () => {
             const { tempFilePaths } = await Taro.chooseImage({ count: 1 })
             Taro.showLoading({ title: '图片上传中...' })
-            const res = await axios.post('https://sm.ms/api/upload', new PostData({
-              smfile: new FileData(tempFilePaths[0]),
-              ssl: true,
-              format: 'json',
-            }))
+            const res = await axios.post(
+              'https://sm.ms/api/upload',
+              new PostData({
+                smfile: new FileData(tempFilePaths[0]),
+                ssl: true,
+                format: 'json',
+              }),
+            )
             Taro.hideLoading()
             Taro.showModal({
               title: '返回结果',

@@ -11,9 +11,11 @@ export class PostData<T extends Record<string, any>> {
       fileData: {} as any,
     }
     if (isObject(postData)) {
-      Object.keys(postData).forEach(key => {
+      Object.keys(postData).forEach((key) => {
         if (postData[key] && postData[key] instanceof FileData) {
-          (parsedPostData.fileData as any)[key] = (postData[key] as FileData).getFileContent()
+          (parsedPostData.fileData as any)[key] = (
+            postData[key] as FileData
+          ).getFileContent()
         } else {
           (parsedPostData.normalData as any)[key] = postData[key]
         }
@@ -23,6 +25,6 @@ export class PostData<T extends Record<string, any>> {
   }
 
   toString() {
-    return `[object ${PostData.name}]`
+    return '[object PostData]'
   }
 }

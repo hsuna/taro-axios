@@ -1,4 +1,4 @@
-# taro-axios <a href="https://www.npmjs.com/package/taro-axios"><img src="https://badge.fury.io/js/taro-axios.svg" alt="NPM Version"></a> <a href="https://travis-ci.org/fjc0k/taro-axios"><img src="https://travis-ci.org/fjc0k/taro-axios.svg?branch=master" alt="Build Status"></a> <a href="https://codecov.io/gh/fjc0k/taro-axios"><img src="https://codecov.io/gh/fjc0k/taro-axios/branch/master/graph/badge.svg" alt="Coverage Status"></a> <img src="https://badgen.net/github/license/fjc0k/taro-axios" alt="License">
+# @hsuna/taro-axios <a href="https://www.npmjs.com/package/taro-axios"><img src="https://badge.fury.io/js/taro-axios.svg" alt="NPM Version"></a> <a href="https://travis-ci.org/hsuna/taro-axios"><img src="https://travis-ci.org/hsuna/taro-axios.svg?branch=master" alt="Build Status"></a> <a href="https://codecov.io/gh/hsuna/taro-axios"><img src="https://codecov.io/gh/hsuna/taro-axios/branch/master/graph/badge.svg" alt="Coverage Status"></a> <img src="https://badgen.net/github/license/hsuna/taro-axios" alt="License">
 
 在 [Taro](https://github.com/NervJS/taro) 中使用 [axios](https://github.com/axios/axios)。
 
@@ -18,18 +18,17 @@
 
 ## 安装
 
-### Taro 3
+### Taro 3、Taro 4
 
 ```bash
 # yarn
-yarn add taro-axios
+yarn add @hsuna/taro-axios
 
 # 或, npm
-npm i taro-axios --save
+npm i @hsuna/taro-axios --save
 ```
 
 ### Taro 1、Taro 2
-
 
 ```bash
 # yarn
@@ -46,15 +45,13 @@ npm i taro-axios@0.7.0 --save
 只不过你得这样引入 `axios`：
 
 ```ts
-import { axios } from 'taro-axios'
+import { axios } from "@hsuna/taro-axios";
 // 自版本 0.7.0 起你也可以这样引入:
 // import axios from 'taro-axios'
 
-axios
-  .get('https://jsonplaceholder.typicode.com/todos/1')
-  .then(res => {
-    console.log(res.data)
-  })
+axios.get("https://jsonplaceholder.typicode.com/todos/1").then((res) => {
+  console.log(res.data);
+});
 ```
 
 ## 上传文件
@@ -62,27 +59,27 @@ axios
 为了支持多端上传文件，我们得引入 `PostData` 和 `FileData` 两个类，示例：
 
 ```ts
-import { axios, PostData, FileData } from 'taro-axios'
+import { axios, PostData, FileData } from "@hsuna/taro-axios";
 
 async function uploadImage() {
-  const { tempFilePaths } = await Taro.chooseImage({ count: 1 })
-  Taro.showLoading({ title: '图片上传中...' })
+  const { tempFilePaths } = await Taro.chooseImage({ count: 1 });
+  Taro.showLoading({ title: "图片上传中..." });
   const res = await axios.post(
-    'https://sm.ms/api/upload',
+    "https://sm.ms/api/upload",
     new PostData({
       smfile: new FileData(tempFilePaths[0]),
       ssl: true,
-      format: 'json',
-    }),
-  )
-  Taro.hideLoading()
+      format: "json",
+    })
+  );
+  Taro.hideLoading();
   Taro.showModal({
-    title: '返回结果',
+    title: "返回结果",
     content: JSON.stringify(res.data),
-  })
+  });
 }
 ```
 
 ## 许可
 
-MIT © Jay Fong
+MIT © Hsuna Chan

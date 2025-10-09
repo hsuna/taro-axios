@@ -4,23 +4,20 @@ import { PostData } from '../helpers'
 // @ts-ignore
 import nativeXhrAdapter from 'axios/lib/adapters/xhr'
 
-export const xhrAdapter: AxiosAdapter = config => {
-  return new Promise(resolve => {
+export const xhrAdapter: AxiosAdapter = (config) => {
+  return new Promise<void>((resolve) => {
     // 适配 PostData
     if (config.data && config.data instanceof PostData) {
       const { normalData, fileData } = config.data.getParsedPostData()
       const hasFileData = Object.keys(fileData).length > 0
       if (hasFileData) {
         const formData = new FormData()
-        forEach(
-          normalData,
-          (value, key) => {
-            formData.set(key as any, value)
-          },
-        )
+        forEach(normalData, (value, key) => {
+          formData.set(key as any, value)
+        })
         Promise.all(
-          Object.keys(fileData).map(key => {
-            return new Promise(resolve => {
+          Object.keys(fileData).map((key) => {
+            return new Promise((resolve) => {
               const fileContent = fileData[key]
 
               // 兼容 blob 地址
@@ -35,7 +32,7 @@ export const xhrAdapter: AxiosAdapter = config => {
               } else {
                 resolve(fileContent)
               }
-            }).then(fileContent => formData.set(key, fileContent as any))
+            }).then((fileContent) => formData.set(key, fileContent as any))
           }),
         ).then(() => {
           config.data = formData

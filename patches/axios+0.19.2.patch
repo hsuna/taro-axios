@@ -1,5 +1,5 @@
 diff --git a/node_modules/axios/lib/defaults.js b/node_modules/axios/lib/defaults.js
-index 23e1cbd..0b91da2 100644
+index 23e1cbd..600d92c 100644
 --- a/node_modules/axios/lib/defaults.js
 +++ b/node_modules/axios/lib/defaults.js
 @@ -36,7 +36,9 @@ var defaults = {
@@ -13,6 +13,15 @@ index 23e1cbd..0b91da2 100644
      ) {
        return data;
      }
+@@ -49,7 +51,7 @@ var defaults = {
+     }
+     if (utils.isObject(data)) {
+       setContentTypeIfUnset(headers, 'application/json;charset=utf-8');
+-      return JSON.stringify(data);
++      return data;
+     }
+     return data;
+   }],
 diff --git a/node_modules/axios/lib/utils.js b/node_modules/axios/lib/utils.js
 index e028c67..ce878c5 100644
 --- a/node_modules/axios/lib/utils.js
