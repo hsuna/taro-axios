@@ -6,7 +6,7 @@ name: Node.js Package
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - "v*.*.*"
 
 jobs:
   publish-npm:
@@ -25,6 +25,10 @@ jobs:
 
       - name: Build project
         run: npm run build
+
+      - name: Strip dev-only fields from package.json (CI only)
+        run: |
+          node -e "const fs=require('fs');const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));['scripts','devDependencies','husky','lint-staged','commitlint','eslintConfig','eslintIgnore','jest','browserslist'].forEach(k=>delete pkg[k]);fs.writeFileSync('package.json',JSON.stringify(pkg,null,2)+'\n');"
 
       - name: Publish to npm
         env:
