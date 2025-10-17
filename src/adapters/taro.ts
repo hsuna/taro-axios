@@ -105,6 +105,8 @@ export const taroAdapter: AxiosAdapter = (config) => {
         dataType: (config.responseType === 'json'
           ? 'json'
           : config.responseType) as Taro.request.Option['dataType'],
+        // 超时时间
+        timeout: config.timeout,
       })
       abortRequestTask = (request as any).abort
       requestTask = request.then((res) => {
