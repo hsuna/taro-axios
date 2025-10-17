@@ -47,6 +47,8 @@ export const taroAdapter: AxiosAdapter = (config) => {
           name: fileName,
           filePath: filePath,
           formData: normalData,
+          // 超时时间
+          timeout: config.timeout,
         })
         abortRequestTask = request.abort
         if (typeof config.onUploadProgress === 'function') {
